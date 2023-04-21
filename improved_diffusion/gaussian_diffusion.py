@@ -894,7 +894,7 @@ class GaussianDiffusion:
             nonzero_mask = (t != 0).float()  # no noise when t == 0
             
             terms["mse"] += (mse_first + mse_second) * nonzero_mask / 2
-            terms["mse"] += mean_flat((pred_xstart_first - pred_xstart_second) ** 2)
+            #terms["mse"] += mean_flat((pred_xstart_first - pred_xstart_second) ** 2)
             terms["loss"] = terms["mse"]
 
         else:
@@ -988,9 +988,12 @@ class GaussianDiffusion:
         xstart_mse = []
         mse = []
         for t in list(range(self.num_timesteps))[::-1]:
-            if t < self.num_timesteps -1:
-                t_batch_ad_1 = th.tensor([t+1]*batch_size, device=device)
-                x_ad_1 = self.q_sample(x_start=x_start, t=t_batch_ad_1)
+            if residual_model != None:
+                if t < self.num_timesteps -1:
+                    t_batch_ad_1 = th.tensor([t+1]*batch_size, device=device)
+                    x_ad_1 = self.q_sample(x_start=x_start, t=t_batch_ad_1)
+                else:
+                    x_ad_1 = None
             else:
                 x_ad_1 = None
             t_batch = th.tensor([t] * batch_size, device=device)
